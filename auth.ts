@@ -7,7 +7,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [Spotify({
         clientId: process.env.AUTH_SPOTIFY_ID,
         clientSecret: process.env.AUTH_SPOTIFY_SECRET,
-        authorization: 'https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private'
+        authorization: 'https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private',
     })],
 
     callbacks: {
@@ -24,6 +24,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             return session
         },
+        async redirect({ url, baseUrl }) {
+            // Allows relative callback URLs
+            if (url.startsWith("/")) return `${baseUrl}${url}`
+            // Allows callback URLs on the same origin
+            else if (new URL(url).origin === baseUrl) return url
+            return baseUrl
+        }
     },
     experimental: {
         enableWebAuthn: true,
